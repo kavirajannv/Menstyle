@@ -1,0 +1,72 @@
+@model MenStyle.Web.Models.Product
+@{
+    ViewData["Title"] = "Add Product";
+    var categories = (IEnumerable<MenStyle.Web.Models.Category>)ViewBag.Categories;
+}
+
+<div class="admin-header">
+    <h1 class="admin-title">Add Product</h1>
+    <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="btn-dark">
+        <i class="fas fa-arrow-left me-1"></i> Back
+    </a>
+</div>
+
+<div style="max-width: 700px;">
+    <form asp-area="Admin" asp-controller="Products" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-card">
+            <div asp-validation-summary="ModelOnly" class="alert-menstyle alert-error mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label-custom" asp-for="Name">Product Name</label>
+                    <input asp-for="Name" class="form-input-custom" placeholder="e.g. Classic Wool Blazer" required />
+                    <span asp-validation-for="Name" class="text-danger" style="font-size: 0.75rem;"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-custom" asp-for="CategoryId">Category</label>
+                    <select asp-for="CategoryId" class="form-input-custom" required>
+                        <option value="">Select a category</option>
+                        @foreach (var cat in categories)
+                        {
+                            <option value="@cat.Id">@cat.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-custom" asp-for="Price">Price ($)</label>
+                    <input asp-for="Price" type="number" step="0.01" class="form-input-custom" placeholder="0.00" required />
+                </div>
+                <div class="col-12">
+                    <label class="form-label-custom" asp-for="Description">Description</label>
+                    <textarea asp-for="Description" class="form-input-custom" rows="4" placeholder="Product description..."></textarea>
+                </div>
+                <div class="col-12">
+                    <label class="form-label-custom" asp-for="ImageUrl">Image URL</label>
+                    <input asp-for="ImageUrl" class="form-input-custom" placeholder="https://images.unsplash.com/..." />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-custom" asp-for="StockQuantity">Stock Quantity</label>
+                    <input asp-for="StockQuantity" type="number" class="form-input-custom" placeholder="0" min="0" />
+                </div>
+                <div class="col-md-3 d-flex align-items-center gap-2 pt-2">
+                    <input asp-for="IsFeatured" type="checkbox" id="IsFeatured" 
+                           style="width: 18px; height: 18px; accent-color: var(--gold);" />
+                    <label for="IsFeatured" class="form-label-custom mb-0" style="text-transform: none; letter-spacing: 0;">Featured</label>
+                </div>
+                <div class="col-md-3 d-flex align-items-center gap-2 pt-2">
+                    <input asp-for="IsActive" type="checkbox" id="IsActive" checked
+                           style="width: 18px; height: 18px; accent-color: var(--gold);" />
+                    <label for="IsActive" class="form-label-custom mb-0" style="text-transform: none; letter-spacing: 0;">Active</label>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 mt-4">
+                <button type="submit" class="btn-gold">
+                    <i class="fas fa-plus me-1"></i> Create Product
+                </button>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="btn-dark">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>

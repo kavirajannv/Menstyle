@@ -1,0 +1,126 @@
+@model MenStyle.Web.Models.ViewModels.ProductsViewModel
+@{
+    ViewData["Title"] = Model.CategoryName ?? (string.IsNullOrEmpty(Model.SearchQuery) ? "Shop" : $"Search: {Model.SearchQuery}");
+}
+
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb-custom mb-2">
+            <a asp-controller="Home" asp-action="Index" asp-area="">Home</a>
+            <i class="fas fa-chevron-right" style="font-size: 0.6rem;"></i>
+            <span class="breadcrumb-item-active">@(Model.CategoryName ?? "All Products")</span>
+        </div>
+        <h1 class="section-title">@(Model.CategoryName ?? "All Products")</h1>
+        @if (!string.IsNullOrEmpty(Model.SearchQuery))
+        {
+            <p style="color: var(--gray); font-size: 0.875rem; margin-top: 0.5rem;">
+                Showing results for "<span style="color:var(--gold)">@Model.SearchQuery</span>"
+                — @Model.Products.Count() result(s) found
+            </p>
+        }
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4">
+        <!-- ── Sidebar Filter ─── -->
+        <div class="col-lg-3">
+            <div class="form-card sticky-top" style="top: 5rem;">
+                <div class="section-subtitle mb-3">Filter</div>
+                <h6 style="color: var(--white); margin-bottom: 1rem; font-size: 0.9rem;">Categories</h6>
+                <div class="d-flex flex-column gap-2">
+                    <a asp-controller="Shop" asp-action="Index" asp-area=""
+                       class="admin-nav-item @(Model.CategoryId == null && string.IsNullOrEmpty(Model.SearchQuery) ? "active" : "")">
+                        <i class="fas fa-th-large"></i> All Products
+                    </a>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="@cat.Id" asp-area=""
+                           class="admin-nav-item @(Model.CategoryId == cat.Id ? "active" : "")">
+                            <i class="fas fa-tag"></i> @cat.Name
+                            <span class="ms-auto" style="font-size: 0.7rem; color: var(--gray);">@cat.Products.Count</span>
+                        </a>
+                    }
+                </div>
+
+                <hr style="border-color: var(--border-dark); margin: 1.5rem 0;" />
+
+                <h6 style="color: var(--white); margin-bottom: 1rem; font-size: 0.9rem;">Search</h6>
+                <form asp-controller="Shop" asp-action="Index" asp-area="" method="get">
+                    <input type="text" name="search" class="form-input-custom" placeholder="Search products..." value="@Model.SearchQuery" />
+                    <button type="submit" class="btn-gold w-100 mt-2" style="justify-content: center;">
+                        <i class="fas fa-search me-1"></i> Search
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ── Products Grid ─── -->
+        <div class="col-lg-9">
+            @if (!Model.Products.Any())
+            {
+                <div class="text-center py-5">
+                    <div style="font-size: 4rem; color: var(--gray); margin-bottom: 1rem;"><i class="fas fa-box-open"></i></div>
+                    <h3 style="color: var(--white); font-family: 'Playfair Display', serif;">No Products Found</h3>
+                    <p style="color: var(--gray);">Try adjusting your search or browse another category.</p>
+                    <a asp-controller="Shop" asp-action="Index" asp-area="" class="btn-gold mt-3">Browse All</a>
+                </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var product in Model.Products)
+                    {
+                        <div class="col-6 col-md-4">
+                            <div class="product-card">
+                                <div class="product-img-wrap">
+                                    <img src="@product.ImageUrl" alt="@product.Name" loading="lazy"
+                                         onerror="this.src='https://via.placeholder.com/400x500/1E1E1E/C9A84C?text=MenStyle'" />
+                                    @if (product.IsFeatured)
+                                    {
+                                        <div class="product-badge">Featured</div>
+                                    }
+                                    @if (product.StockQuantity == 0)
+                                    {
+                                        <div class="product-badge" style="background: var(--gray); color: var(--white);">Out of Stock</div>
+                                    }
+                                    <div class="product-actions-overlay">
+                                        <a asp-controller="Shop" asp-action="Details" asp-route-id="@product.Id" asp-area="" 
+                                           class="btn-dark flex-fill" style="justify-content: center; font-size: 0.75rem;">
+                                            <i class="fas fa-eye me-1"></i> View
+                                        </a>
+                                        @if (User.Identity?.IsAuthenticated == true && product.StockQuantity > 0)
+                                        {
+                                            <form asp-controller="Cart" asp-action="Add" asp-area="" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="productId" value="@product.Id" />
+                                                <button type="submit" class="btn-gold" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-bag-shopping"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-category">@product.Category?.Name</div>
+                                    <div class="product-name">@product.Name</div>
+                                    <div class="product-price">$@product.Price.ToString("0.00")</div>
+                                    <div class="product-stock">
+                                        @if (product.StockQuantity > 0)
+                                        {
+                                            <span style="color: #34d399;"><i class="fas fa-circle" style="font-size:0.5rem;"></i> In Stock (@product.StockQuantity)</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="color: #f87171;"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Out of Stock</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

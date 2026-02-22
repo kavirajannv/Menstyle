@@ -1,0 +1,72 @@
+@model MenStyle.Web.Models.Order
+@{
+    ViewData["Title"] = "Order Confirmed!";
+}
+
+<div class="container py-5">
+    <div class="success-page">
+        <div class="success-icon">
+            <i class="fas fa-check" style="color: #34d399;"></i>
+        </div>
+        <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--white); margin-bottom: 0.75rem;">
+            Order Confirmed!
+        </h1>
+        <p style="color: var(--gray-light); font-size: 1rem; margin-bottom: 2rem;">
+            Thank you, <strong style="color: var(--white);">@Model.FullName</strong>! 
+            Your order #<strong style="color: var(--gold);">@Model.Id</strong> has been placed successfully.
+        </p>
+
+        <!-- Order Details Card -->
+        <div class="form-card mx-auto mb-4" style="max-width: 600px; text-align: left;">
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="form-label-custom">Order Number</div>
+                    <div style="color: var(--gold); font-weight: 700;">#@Model.Id</div>
+                </div>
+                <div class="col-6">
+                    <div class="form-label-custom">Order Date</div>
+                    <div style="color: var(--white);">@Model.OrderDate.ToString("MMM dd, yyyy")</div>
+                </div>
+                <div class="col-6">
+                    <div class="form-label-custom">Status</div>
+                    <span class="status-badge status-pending">@Model.Status</span>
+                </div>
+                <div class="col-6">
+                    <div class="form-label-custom">Payment Method</div>
+                    <div style="color: var(--white); font-weight: 600;">@Model.PaymentMethod</div>
+                </div>
+                <div class="col-6">
+                    <div class="form-label-custom">Payment Status</div>
+                    <span class="status-badge @(Model.PaymentStatus == "Paid" ? "status-delivered" : "status-pending")">@Model.PaymentStatus</span>
+                </div>
+                <div class="col-6">
+                    <div class="form-label-custom">Total</div>
+                    <div style="color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700;">
+                        $@Model.TotalAmount.ToString("0.00")
+                    </div>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-dark); padding-top: 1rem;">
+                <div class="form-label-custom">Items Ordered</div>
+                @foreach (var detail in Model.OrderDetails)
+                {
+                    <div class="d-flex justify-content-between align-items-center py-2"
+                         style="border-bottom: 1px solid var(--border-dark); font-size: 0.875rem;">
+                        <span style="color: var(--white);">@detail.Product?.Name <span style="color: var(--gray);">×@detail.Quantity</span></span>
+                        <span style="color: var(--gold);">$@detail.Subtotal.ToString("0.00")</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a asp-controller="Orders" asp-action="Index" asp-area="" class="btn-gold">
+                <i class="fas fa-box me-1"></i> View My Orders
+            </a>
+            <a asp-controller="Shop" asp-action="Index" asp-area="" class="btn-outline-gold">
+                Continue Shopping
+            </a>
+        </div>
+    </div>
+</div>

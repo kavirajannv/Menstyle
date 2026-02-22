@@ -1,0 +1,123 @@
+@model MenStyle.Web.Models.Order
+@{
+    ViewData["Title"] = $"Order #{Model.Id}";
+    var statusClass = Model.Status switch {
+        "Pending" => "status-pending",
+        "Processing" => "status-processing",
+        "Shipped" => "status-shipped",
+        "Delivered" => "status-delivered",
+        "Cancelled" => "status-cancelled",
+        _ => "status-pending"
+    };
+}
+
+<div class="container py-5">
+    <div class="breadcrumb-custom mb-4">
+        <a asp-controller="Home" asp-action="Index" asp-area="">Home</a>
+        <i class="fas fa-chevron-right" style="font-size: 0.6rem;"></i>
+        <a asp-controller="Orders" asp-action="Index" asp-area="">My Orders</a>
+        <i class="fas fa-chevron-right" style="font-size: 0.6rem;"></i>
+        <span class="breadcrumb-item-active">Order Details</span>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
+        <h1 class="section-title mb-0">Order #@Model.Id</h1>
+        <span class="status-badge @statusClass" style="font-size: 1rem; padding: 0.5rem 1.25rem;">@Model.Status</span>
+    </div>
+
+    <div class="row g-4">
+        <!-- Order Items -->
+        <div class="col-lg-8">
+            <div class="form-card">
+                <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1.5rem;">
+                    <i class="fas fa-list me-2" style="color: var(--gold);"></i> Items Ordered
+                </h5>
+                <div class="table-responsive">
+                    <table class="dark-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detail in Model.OrderDetails)
+                            {
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 500; color: var(--white);">@detail.Product?.Name</div>
+                                    </td>
+                                    <td style="color: var(--gray-light);">$@detail.Price.ToString("0.00")</td>
+                                    <td style="color: var(--gray-light);">@detail.Quantity</td>
+                                    <td class="text-end" style="color: var(--gold); font-weight: 600;">$@detail.Subtotal.ToString("0.00")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary & Details -->
+        <div class="col-lg-4">
+            <!-- Order Total -->
+            <div class="order-summary-card mb-4" style="margin-top: 0;">
+                <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1.25rem;">Order Summary</h5>
+                <div class="order-summary-row">
+                    <span>Order Date</span>
+                    <span style="color: var(--white);">@Model.OrderDate.ToString("MMM dd, yyyy")</span>
+                </div>
+                <div class="order-summary-row total">
+                    <span>Total Amount</span>
+                    <span class="price">$@Model.TotalAmount.ToString("0.00")</span>
+                </div>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="form-card mb-4" style="border-left: 3px solid var(--gold);">
+                <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1.25rem;">
+                    <i class="fas fa-credit-card me-2" style="color: var(--gold);"></i> Payment Info
+                </h5>
+                <div class="d-flex justify-content-between mb-2">
+                    <span style="color: var(--gray);">Mode</span>
+                    <span style="color: var(--white); font-weight: 500;">@Model.PaymentMethod</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span style="color: var(--gray);">Status</span>
+                    <span class="status-badge @(Model.PaymentStatus == "Paid" ? "status-delivered" : "status-pending")" style="font-size: 0.75rem; padding: 0.2rem 0.6rem;">@Model.PaymentStatus</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.TransactionId))
+                {
+                    <div class="mt-2 pt-2" style="border-top: 1px solid var(--border-dark); font-size: 0.75rem; color: var(--gray); word-break: break-all;">
+                        TXN: @Model.TransactionId
+                    </div>
+                }
+            </div>
+
+            <!-- Shipping Info -->
+            <div class="form-card">
+                <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1.25rem;">
+                    <i class="fas fa-truck me-2" style="color: var(--gold);"></i> Shipping Details
+                </h5>
+                <div class="mb-3">
+                    <div style="font-size: 0.75rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px;">Customer</div>
+                    <div style="color: var(--white);">@Model.FullName</div>
+                </div>
+                <div class="mb-3">
+                    <div style="font-size: 0.75rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px;">Address</div>
+                    <div style="color: var(--white);">@Model.ShippingAddress<br />@Model.City, @Model.PostalCode</div>
+                </div>
+                <div class="mb-0">
+                    <div style="font-size: 0.75rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px;">Phone</div>
+                    <div style="color: var(--white);">@Model.Phone</div>
+                </div>
+            </div>
+
+            <a asp-action="Index" class="btn-dark w-100 mt-4" style="justify-content: center;">
+                <i class="fas fa-arrow-left me-1"></i> Back to Orders
+            </a>
+        </div>
+    </div>
+</div>

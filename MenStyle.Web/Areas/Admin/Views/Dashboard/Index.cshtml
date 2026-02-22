@@ -1,0 +1,119 @@
+@model MenStyle.Web.Models.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="admin-header">
+    <h1 class="admin-title">Dashboard</h1>
+    <div style="font-size: 0.8rem; color: var(--gray);">
+        <i class="fas fa-calendar me-1" style="color: var(--gold);"></i>
+        @DateTime.Now.ToString("dddd, MMMM dd, yyyy")
+    </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-card-icon"><i class="fas fa-shirt"></i></div>
+            <div class="stat-card-value">@Model.TotalProducts</div>
+            <div class="stat-card-label">Total Products</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-card-icon"><i class="fas fa-tags"></i></div>
+            <div class="stat-card-value">@Model.TotalCategories</div>
+            <div class="stat-card-label">Categories</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-card-icon"><i class="fas fa-box"></i></div>
+            <div class="stat-card-value">@Model.TotalOrders</div>
+            <div class="stat-card-label">Total Orders</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: rgba(16,185,129,0.1); color: #34d399;"><i class="fas fa-dollar-sign"></i></div>
+            <div class="stat-card-value" style="color: #34d399;">$@Model.TotalRevenue.ToString("N0")</div>
+            <div class="stat-card-label">Total Revenue</div>
+        </div>
+    </div>
+</div>
+
+<!-- Sales Chart + Recent Orders -->
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="form-card" style="height: 100%;">
+            <h5 style="font-family:'Playfair Display', serif; color: var(--white); margin-bottom: 1.25rem;">
+                <i class="fas fa-chart-line me-2" style="color: var(--gold);"></i> Revenue by Month
+            </h5>
+            @if (Model.SalesByMonth.Any())
+            {
+                var maxSale = Model.SalesByMonth.Values.Max();
+                foreach (var kv in Model.SalesByMonth.TakeLast(6))
+                {
+                    var pct = maxSale > 0 ? (kv.Value / maxSale * 100) : 0;
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1" style="font-size: 0.8rem;">
+                            <span style="color: var(--gray-light);">@kv.Key</span>
+                            <span style="color: var(--gold);">$@kv.Value.ToString("N2")</span>
+                        </div>
+                        <div style="height: 6px; background: var(--dark-3); border-radius: 3px;">
+                            <div style="height: 100%; width: @pct.ToString("0")%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 3px;"></div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="color: var(--gray); text-align: center; padding: 2rem 0; font-size: 0.875rem;">
+                    No sales data yet.
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="form-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 style="font-family:'Playfair Display', serif; color: var(--white); margin: 0;">Recent Orders</h5>
+                <a asp-area="Admin" asp-controller="Orders" asp-action="Index" style="font-size: 0.75rem; color: var(--gold);">View All</a>
+            </div>
+            @foreach (var order in Model.RecentOrders.Take(6))
+            {
+                var statusClass = order.Status switch {
+                    "Pending" => "status-pending", "Processing" => "status-processing",
+                    "Shipped" => "status-shipped", "Delivered" => "status-delivered",
+                    "Cancelled" => "status-cancelled", _ => "status-pending"
+                };
+                <div class="d-flex align-items-center justify-content-between py-2" style="border-bottom: 1px solid var(--border-dark); font-size: 0.8rem;">
+                    <span style="color: var(--gold);">#@order.Id</span>
+                    <span style="color: var(--gray-light);">@order.OrderDate.ToString("MMM dd")</span>
+                    <span style="color: var(--white);">$@order.TotalAmount.ToString("0.00")</span>
+                    <span class="status-badge @statusClass">@order.Status</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="row g-3 mt-2">
+    <div class="col-md-4">
+        <a asp-area="Admin" asp-controller="Products" asp-action="Create" class="btn-gold w-100" style="justify-content: center; padding: 0.85rem;">
+            <i class="fas fa-plus me-1"></i> Add Product
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-area="Admin" asp-controller="Categories" asp-action="Create" class="btn-outline-gold w-100" style="justify-content: center; padding: 0.85rem;">
+            <i class="fas fa-plus me-1"></i> Add Category
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="btn-dark w-100" style="justify-content: center; padding: 0.85rem;">
+            <i class="fas fa-box me-1"></i> Manage Orders
+        </a>
+    </div>
+</div>

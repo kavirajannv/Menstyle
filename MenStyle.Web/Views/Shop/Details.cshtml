@@ -1,0 +1,107 @@
+@model MenStyle.Web.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container py-5">
+    <div class="breadcrumb-custom mb-4">
+        <a asp-controller="Home" asp-action="Index" asp-area="">Home</a>
+        <i class="fas fa-chevron-right" style="font-size: 0.6rem;"></i>
+        <a asp-controller="Shop" asp-action="Index" asp-area="">Shop</a>
+        <i class="fas fa-chevron-right" style="font-size: 0.6rem;"></i>
+        <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="@Model.CategoryId" asp-area="">@Model.Category?.Name</a>
+        <i class="fas fa-chevron-right" style="font-size: 0.6rem;"></i>
+        <span class="breadcrumb-item-active">@Model.Name</span>
+    </div>
+
+    <div class="row g-5">
+        <!-- Image -->
+        <div class="col-lg-5">
+            <div style="border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-dark); aspect-ratio: 3/4; background: var(--dark-3);">
+                <img src="@Model.ImageUrl" alt="@Model.Name" 
+                     style="width: 100%; height: 100%; object-fit: cover; object-position: top;"
+                     onerror="this.src='https://via.placeholder.com/400x500/1E1E1E/C9A84C?text=MenStyle'" />
+            </div>
+        </div>
+
+        <!-- Details -->
+        <div class="col-lg-7">
+            <div class="product-category mb-2">@Model.Category?.Name</div>
+            <h1 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--white); margin-bottom: 1rem;">
+                @Model.Name
+            </h1>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--gold); margin-bottom: 1.5rem;">
+                $@Model.Price.ToString("0.00")
+            </div>
+
+            @if (Model.StockQuantity > 0)
+            {
+                <div class="mb-3" style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 50px; padding: 0.35rem 0.85rem; font-size: 0.8rem; color: #34d399;">
+                    <i class="fas fa-circle" style="font-size: 0.5rem;"></i> In Stock — @Model.StockQuantity available
+                </div>
+            }
+            else
+            {
+                <div class="mb-3" style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 50px; padding: 0.35rem 0.85rem; font-size: 0.8rem; color: #f87171;">
+                    <i class="fas fa-circle" style="font-size: 0.5rem;"></i> Out of Stock
+                </div>
+            }
+
+            <p style="color: var(--gray-light); line-height: 1.9; margin-bottom: 2rem; font-size: 0.95rem;">
+                @Model.Description
+            </p>
+
+            @if (User.Identity?.IsAuthenticated == true && Model.StockQuantity > 0)
+            {
+                <form asp-controller="Cart" asp-action="AddFromDetails" asp-area="" method="post" class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label-custom mb-0">Qty:</label>
+                        <input type="number" name="quantity" value="1" min="1" max="@Model.StockQuantity"
+                               class="cart-qty-input" style="width: 70px;" />
+                    </div>
+                    <button type="submit" class="btn-gold">
+                        <i class="fas fa-bag-shopping me-1"></i> Add to Cart
+                    </button>
+                </form>
+            }
+            else if (User.Identity?.IsAuthenticated != true)
+            {
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn-gold mb-4">
+                    <i class="fas fa-right-to-bracket me-1"></i> Sign In to Purchase
+                </a>
+            }
+
+            <a asp-controller="Shop" asp-action="Index" asp-area="" class="btn-dark">
+                <i class="fas fa-arrow-left me-1"></i> Back to Shop
+            </a>
+
+            <!-- Features -->
+            <div class="row g-3 mt-4">
+                <div class="col-6">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 36px; height: 36px; background: rgba(201,168,76,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 0.9rem;">
+                            <i class="fas fa-truck-fast"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--white); font-weight: 600;">Free Shipping</div>
+                            <div style="font-size: 0.7rem; color: var(--gray);">On orders over $100</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 36px; height: 36px; background: rgba(201,168,76,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 0.9rem;">
+                            <i class="fas fa-rotate-left"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--white); font-weight: 600;">30-Day Returns</div>
+                            <div style="font-size: 0.7rem; color: var(--gray);">Hassle-free policy</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

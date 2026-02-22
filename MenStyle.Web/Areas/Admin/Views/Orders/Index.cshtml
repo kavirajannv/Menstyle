@@ -1,0 +1,73 @@
+@model IEnumerable<MenStyle.Web.Models.Order>
+@{
+    ViewData["Title"] = "Manage Orders";
+}
+
+<div class="admin-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+        <h1 class="admin-title mb-0">Orders</h1>
+        <div style="font-size: 0.8rem; color: var(--gray);">@Model.Count() total orders</div>
+    </div>
+    
+    <form method="get" class="d-flex gap-2 flex-wrap">
+        <div class="search-bar-custom" style="width: 250px;">
+            <i class="fas fa-search"></i>
+            <input type="text" name="search" placeholder="Order ID, Name, Phone..." value="@ViewBag.Search" />
+        </div>
+        <select name="status" class="form-input-custom" style="width: 150px; background: var(--dark-2);">
+            <option value="All">All Statuses</option>
+            <option value="Pending" selected="@(ViewBag.Status == "Pending")">Pending</option>
+            <option value="Processing" selected="@(ViewBag.Status == "Processing")">Processing</option>
+            <option value="Shipped" selected="@(ViewBag.Status == "Shipped")">Shipped</option>
+            <option value="Delivered" selected="@(ViewBag.Status == "Delivered")">Delivered</option>
+            <option value="Cancelled" selected="@(ViewBag.Status == "Cancelled")">Cancelled</option>
+        </select>
+        <button type="submit" class="btn-gold" style="padding: 0.5rem 1rem;">Filter</button>
+        @if (!string.IsNullOrEmpty(ViewBag.Search) || (ViewBag.Status != null && ViewBag.Status != "All"))
+        {
+            <a asp-action="Index" class="btn-dark" style="padding: 0.5rem 1rem; color: var(--gray);">Clear</a>
+        }
+    </form>
+</div>
+
+<div class="form-card">
+    <div class="table-responsive">
+        <table class="dark-table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    var statusClass = order.Status switch {
+                        "Pending" => "status-pending", "Processing" => "status-processing",
+                        "Shipped" => "status-shipped", "Delivered" => "status-delivered",
+                        "Cancelled" => "status-cancelled", _ => "status-pending"
+                    };
+                    <tr>
+                        <td style="color: var(--gold); font-weight: 600;">#@order.Id</td>
+                        <td style="font-size: 0.875rem; color: var(--gray-light);">@order.OrderDate.ToString("MMM dd, yyyy HH:mm")</td>
+                        <td style="font-size: 0.875rem; color: var(--white);">@order.FullName<br /><span style="color: var(--gray); font-size: 0.75rem;">@order.City</span></td>
+                        <td style="font-size: 0.875rem; color: var(--gray-light);">@order.OrderDetails.Count items</td>
+                        <td style="color: var(--gold); font-weight: 600;">$@order.TotalAmount.ToString("0.00")</td>
+                        <td><span class="status-badge @statusClass">@order.Status</span></td>
+                        <td>
+                            <a asp-area="Admin" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id"
+                               class="btn-dark" style="font-size: 0.75rem; padding: 0.3rem 0.65rem;">
+                                View <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

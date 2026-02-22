@@ -1,0 +1,175 @@
+@model MenStyle.Web.Models.Order
+@{
+    ViewData["Title"] = $"Order #{Model.Id}";
+    var statusClass = Model.Status switch {
+        "Pending" => "status-pending", "Processing" => "status-processing",
+        "Shipped" => "status-shipped", "Delivered" => "status-delivered",
+        "Cancelled" => "status-cancelled", _ => "status-pending"
+    };
+}
+
+<div class="container-fluid py-4">
+    <div class="breadcrumb-custom mb-4">
+        <a asp-action="Index">Orders</a>
+        <i class="fas fa-chevron-right mx-2" style="font-size: 0.7rem;"></i>
+        <span class="breadcrumb-item-active">Order Details #@Model.Id</span>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="form-card mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin: 0;">
+                        <i class="fas fa-shopping-bag me-2" style="color: var(--gold);"></i> Ordered Items
+                    </h5>
+                    <span class="status-badge @(Model.Status == "Delivered" ? "status-shipped" : "status-pending")">@Model.Status</span>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="dark-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderDetails)
+                            {
+                                <tr>
+                                    <td>
+                                        <div style="color: var(--white); font-weight: 500;">@item.Product?.Name</div>
+                                        <div style="font-size: 0.75rem; color: var(--gray);">ID: #@item.ProductId</div>
+                                    </td>
+                                    <td style="color: var(--gray-light);">$@item.Price.ToString("0.00")</td>
+                                    <td style="color: var(--gray-light);">@item.Quantity</td>
+                                    <td class="text-end" style="color: var(--gold); font-weight: 600;">$@item.Subtotal.ToString("0.00")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end" style="color: var(--gray); border-bottom: none;">Subtotal</td>
+                                <td class="text-end" style="color: var(--white); border-bottom: none;">$@Model.TotalAmount.ToString("0.00")</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end" style="color: var(--gray); border-bottom: none;">Shipping</td>
+                                <td class="text-end" style="color: #34d399; border-bottom: none;">FREE</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end" style="color: var(--gold); font-weight: 700; border-bottom: none; font-size: 1.1rem;">Order Total</td>
+                                <td class="text-end" style="color: var(--gold); font-weight: 700; border-bottom: none; font-size: 1.1rem;">$@Model.TotalAmount.ToString("0.00")</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1.5rem;">
+                    <i class="fas fa-history me-2" style="color: var(--gold);"></i> Order Timeline
+                </h5>
+                <div class="timeline-custom">
+                    <div class="timeline-item-custom">
+                        <div class="timeline-dot-custom active"></div>
+                        <div class="timeline-content-custom">
+                            <div class="d-flex justify-content-between">
+                                <span style="color: var(--white); font-weight: 500;">Order Placed</span>
+                                <span style="font-size: 0.75rem; color: var(--gray);">@Model.OrderDate.ToString("MMM dd, yyyy HH:mm")</span>
+                            </div>
+                            <p style="font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem;">The customer successfully placed the order.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar / User Panel -->
+        <div class="col-lg-4">
+            <div class="form-card mb-4" style="border-left: 3px solid var(--gold);">
+                <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1.5rem;">
+                    <i class="fas fa-user-circle me-2" style="color: var(--gold);"></i> Customer Panel
+                </h5>
+                <div class="d-flex align-items-center mb-4 gap-3">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--dark-3); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 1.25rem;">
+                        @Model.FullName[0]
+                    </div>
+                    <div>
+                        <div style="color: var(--white); font-weight: 600;">@Model.FullName</div>
+                        <div style="font-size: 0.8rem; color: var(--gray);">ID: @Model.UserId</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-label-custom">Contact Info</div>
+                    <div style="color: var(--white); font-size: 0.85rem;"><i class="fas fa-phone-alt me-2" style="color: var(--gray); font-size: 0.75rem;"></i> @Model.Phone</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-label-custom">Shipping Address</div>
+                    <div style="color: var(--white); font-size: 0.85rem; line-height: 1.4;">
+                        <i class="fas fa-map-marker-alt me-2" style="color: var(--gray); font-size: 0.75rem;"></i>
+                        @Model.ShippingAddress<br />@Model.City, @Model.PostalCode
+                    </div>
+                </div>
+
+                <hr style="border-color: var(--border-dark); margin: 1.5rem 0;" />
+
+                <div class="mb-3">
+                    <div class="form-label-custom">Payment Details</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span style="color: var(--gray-light); font-size: 0.85rem;">Mode</span>
+                        <span style="color: var(--white); font-weight: 500;">@Model.PaymentMethod</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                        <span style="color: var(--gray-light); font-size: 0.85rem;">Status</span>
+                        <span class="status-badge @(Model.PaymentStatus == "Paid" ? "status-shipped" : "status-pending")" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">@Model.PaymentStatus</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.TransactionId))
+                    {
+                        <div style="font-size: 0.75rem; color: var(--gray); margin-top: 0.5rem; word-break: break-all;">
+                            ID: @Model.TransactionId
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Status Actions -->
+            <div class="form-card">
+                <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1.25rem;">
+                    Update Progress
+                </h5>
+                <form asp-action="UpdateStatus" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="mb-3">
+                        <select name="status" class="form-input-custom" style="background: var(--dark-2);">
+                            <option value="Pending" selected="@(Model.Status == "Pending")">Pending</option>
+                            <option value="Processing" selected="@(Model.Status == "Processing")">Processing</option>
+                            <option value="Shipped" selected="@(Model.Status == "Shipped")">Shipped</option>
+                            <option value="Delivered" selected="@(Model.Status == "Delivered")">Delivered</option>
+                            <option value="Cancelled" selected="@(Model.Status == "Cancelled")">Cancelled</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-gold w-100" style="justify-content: center;">Update Status</button>
+                </form>
+
+                @if (Model.Status != "Cancelled" && Model.Status != "Delivered")
+                {
+                    <form asp-action="UpdateStatus" method="post" class="mt-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <input type="hidden" name="status" value="Cancelled" />
+                        <button type="submit" class="btn-dark w-100" style="justify-content: center; color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">
+                            <i class="fas fa-times me-2"></i> Cancel Order
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+</div>

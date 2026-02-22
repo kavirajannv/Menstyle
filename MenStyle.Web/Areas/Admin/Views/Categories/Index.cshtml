@@ -1,0 +1,51 @@
+@model IEnumerable<MenStyle.Web.Models.Category>
+@{
+    ViewData["Title"] = "Manage Categories";
+}
+
+<div class="admin-header">
+    <h1 class="admin-title">Categories</h1>
+    <a asp-area="Admin" asp-controller="Categories" asp-action="Create" class="btn-gold">
+        <i class="fas fa-plus me-1"></i> Add Category
+    </a>
+</div>
+
+<div class="form-card">
+    <table class="dark-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Products</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cat in Model)
+            {
+                <tr>
+                    <td style="color: var(--gold);">#@cat.Id</td>
+                    <td style="color: var(--white); font-weight: 500;">@cat.Name</td>
+                    <td style="color: var(--gray-light); font-size: 0.875rem;">@cat.Description</td>
+                    <td><span class="status-badge status-processing">@cat.Products.Count items</span></td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a asp-area="Admin" asp-controller="Categories" asp-action="Edit" asp-route-id="@cat.Id"
+                               class="btn-dark" style="font-size: 0.75rem; padding: 0.3rem 0.65rem;">
+                                <i class="fas fa-pencil"></i>
+                            </a>
+                            <form asp-area="Admin" asp-controller="Categories" asp-action="Delete" asp-route-id="@cat.Id" method="post"
+                                  onsubmit="return confirm('Delete this category? Products in this category may be affected.')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-dark" style="font-size: 0.75rem; padding: 0.3rem 0.65rem; color: #f87171; border-color: rgba(239,68,68,0.3);">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

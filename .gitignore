@@ -1,0 +1,37 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+out/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+
+# NuGet
+*.nupkg
+packages/
+*.snk
+*.nuspec
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Publish
+*.Publish.xml
+*.pubxml
+*.publishproj
+
+# Others
+*.DS_Store
+*.env
+*.swp
+*.bak
+*.tmp

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin | @ViewData["Title"] | MenStyle</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/menstyle.css" asp-append-version="true" />
+</head>
+<body style="background: var(--dark);">
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="admin-logo">
+                <i class="fas fa-shield-halved" style="font-size: 1rem;"></i>
+                MenStyle
+            </div>
+            <nav>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" 
+                   class="admin-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </a>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Index"
+                   class="admin-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Products" ? "active" : "")">
+                    <i class="fas fa-shirt"></i> Products
+                </a>
+                <a asp-area="Admin" asp-controller="Categories" asp-action="Index"
+                   class="admin-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Categories" ? "active" : "")">
+                    <i class="fas fa-tags"></i> Categories
+                </a>
+                <a asp-area="Admin" asp-controller="Orders" asp-action="Index"
+                   class="admin-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Orders" && ViewContext.RouteData.Values["area"]?.ToString() == "Admin" ? "active" : "")">
+                    <i class="fas fa-box"></i> Orders
+                </a>
+            </nav>
+            <div style="position: absolute; bottom: 1.5rem; left: 1.5rem; right: 1.5rem;">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="admin-nav-item">
+                    <i class="fas fa-store"></i> View Store
+                </a>
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
+                    <button type="submit" class="admin-nav-item w-100" style="background: none; border: none; cursor: pointer; color: var(--gray-light); text-align: left;">
+                        <i class="fas fa-right-from-bracket"></i> Sign Out
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="admin-content">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert-menstyle alert-success mb-4">
+                    <i class="fas fa-circle-check"></i> @TempData["Success"]
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert-menstyle alert-error mb-4">
+                    <i class="fas fa-circle-exclamation"></i> @TempData["Error"]
+                </div>
+            }
+            @RenderBody()
+        </div>
+    </div>
+
+    <!-- Real-time Notifications Toast Container -->
+    <div id="notification-container" style="position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; pointer-events: none;"></div>
+
+    <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/orderHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveOrderNotification", function (message, orderId) {
+            showToast(message, orderId);
+            document.getElementById('notification-sound').play().catch(e => console.log("Audio play blocked"));
+        });
+
+        function showToast(message, orderId) {
+            const toast = document.createElement('div');
+            toast.className = 'alert-menstyle alert-success';
+            toast.style.cssText = 'pointer-events: auto; min-width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 4px solid var(--gold); animation: slideIn 0.3s ease-out;';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fas fa-bell fa-shake" style="color: var(--gold);"></i>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 0.9rem;">Real-time Update</div>
+                        <div style="font-size: 0.8rem; color: var(--gray-light);">${message}</div>
+                    </div>
+                    <a href="/Admin/Orders/Details/${orderId}" class="btn-gold" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;">View</a>
+                </div>
+            `;
+            document.getElementById('notification-container').appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                toast.style.transition = 'all 0.5s ease-out';
+                setTimeout(() => toast.remove(), 500);
+            }, 8000);
+        }
+
+        connection.start().catch(err => console.error(err.toString()));
+    </script>
+    <style>
+        @@keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

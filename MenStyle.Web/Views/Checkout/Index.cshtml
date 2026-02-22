@@ -1,0 +1,202 @@
+@model MenStyle.Web.Models.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+
+<div class="container py-5">
+    <h1 class="section-title mb-5">Secure Checkout</h1>
+
+    <form asp-controller="Checkout" asp-action="PlaceOrder" asp-area="" method="post">
+        @Html.AntiForgeryToken()
+        <div class="row g-4">
+            <!-- Shipping Info -->
+            <div class="col-lg-7">
+                <div class="form-card">
+                    <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1.5rem;">
+                        <i class="fas fa-truck me-2" style="color: var(--gold);"></i> Shipping Information
+                    </h5>
+
+                    <div asp-validation-summary="ModelOnly" class="alert-menstyle alert-error mb-3" style="display: none;"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom" for="FullName">Full Name</label>
+                        <input type="text" id="FullName" name="FullName" class="form-input-custom"
+                               placeholder="John Smith" value="@Model.FullName" required />
+                        <span asp-validation-for="FullName" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom" for="ShippingAddress">Street Address</label>
+                        <input type="text" id="ShippingAddress" name="ShippingAddress" class="form-input-custom"
+                               placeholder="123 Main Street" required />
+                        <span asp-validation-for="ShippingAddress" class="text-danger" style="font-size: 0.75rem;"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label-custom" for="City">City</label>
+                            <input type="text" id="City" name="City" class="form-input-custom"
+                                   placeholder="New York" required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label-custom" for="PostalCode">Postal Code</label>
+                            <input type="text" id="PostalCode" name="PostalCode" class="form-input-custom"
+                                   placeholder="10001" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label-custom" for="Phone">Phone Number</label>
+                        <input type="tel" id="Phone" name="Phone" class="form-input-custom"
+                               placeholder="+1 (555) 000-0000" required />
+                    </div>
+                </div>
+
+                <!-- Payment Selection -->
+                <div class="form-card mt-3">
+                    <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1.5rem;">
+                        <i class="fas fa-credit-card me-2" style="color: var(--gold);"></i> Payment Method
+                    </h5>
+
+                    <div class="d-flex flex-column gap-3">
+                        <label class="payment-option-card">
+                            <input type="radio" name="PaymentMethod" value="COD" checked style="display: none;" />
+                            <div class="payment-option-content">
+                                <div class="payment-option-icon"><i class="fas fa-money-bill-wave"></i></div>
+                                <div>
+                                    <div class="payment-option-title">Cash on Delivery (COD)</div>
+                                    <div class="payment-option-desc">Pay with cash when your order is delivered.</div>
+                                </div>
+                                <div class="payment-option-check"><i class="fas fa-circle-check"></i></div>
+                            </div>
+                        </label>
+
+                        <label class="payment-option-card">
+                            <input type="radio" name="PaymentMethod" value="Razorpay" style="display: none;" />
+                            <div class="payment-option-content">
+                                <div class="payment-option-icon"><i class="fas fa-credit-card"></i></div>
+                                <div>
+                                    <div class="payment-option-title">Razorpay</div>
+                                    <div class="payment-option-desc">Cards, NetBanking, Wallets, UPI. Bezpośrednio i bezpiecznie.</div>
+                                </div>
+                                <div class="payment-option-check"><i class="fas fa-circle-check"></i></div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Payment Note -->
+                <div class="form-card mt-3" style="border-color: rgba(201,168,76,0.2); display: none;" id="razorpay-note">
+                    <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1rem;">
+                        <i class="fas fa-credit-card me-2" style="color: var(--gold);"></i> Payment
+                    </h5>
+                    <div class="alert-menstyle" style="margin: 0;">
+                        <i class="fas fa-info-circle"></i>
+                        Payment gateway integration coming soon. Orders will be confirmed and processed upon placement.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-5">
+                <!-- Real-time Preview -->
+                <div class="form-card mb-4" id="checkout-preview" style="border-color: rgba(201,168,76,0.3); background: rgba(201,168,76,0.02);">
+                    <h5 style="font-family: 'Playfair Display', serif; color: var(--gold); margin-bottom: 1.25rem; font-size: 1.1rem;">
+                        <i class="fas fa-eye me-2"></i> Live Preview
+                    </h5>
+                    <div class="preview-item mb-3">
+                        <div style="font-size: 0.7rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.2rem;">Customer Details</div>
+                        <div id="preview-name" style="color: var(--white); font-weight: 500;">@Model.FullName</div>
+                        <div id="preview-phone" style="color: var(--gray); font-size: 0.85rem;">(Not provided)</div>
+                    </div>
+                    <div class="preview-item mb-3">
+                        <div style="font-size: 0.7rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.2rem;">Shipping Address</div>
+                        <div id="preview-address" style="color: var(--white); font-size: 0.9rem; line-height: 1.4;">(Not provided)</div>
+                    </div>
+                    <div class="preview-item mb-0">
+                        <div style="font-size: 0.7rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.2rem;">Payment Mode</div>
+                        <div id="preview-payment" class="status-badge status-pending" style="display: inline-block; margin-top: 0.2rem;">Cash on Delivery (COD)</div>
+                    </div>
+                </div>
+
+                <div class="order-summary-card">
+                    <h5 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 1.25rem;">
+                        Order Review
+                    </h5>
+                    @foreach (var item in Model.CartItems)
+                    {
+                        <div class="order-summary-row">
+                            <span style="flex: 1;">
+                                @item.Product?.Name 
+                                <span style="color: var(--gray);">×@item.Quantity</span>
+                            </span>
+                            <span>$@item.Subtotal.ToString("0.00")</span>
+                        </div>
+                    }
+                    <div class="order-summary-row">
+                        <span>Subtotal</span>
+                        <span>$@Model.Total.ToString("0.00")</span>
+                    </div>
+                    <div class="order-summary-row">
+                        <span>Shipping</span>
+                        <span style="color: #34d399;">@(Model.Total >= 100 ? "FREE" : "$9.99")</span>
+                    </div>
+                    <div class="order-summary-row total">
+                        <span>Total</span>
+                        <span class="price">$@((Model.Total >= 100 ? Model.Total : Model.Total + 9.99m).ToString("0.00"))</span>
+                    </div>
+
+                    <button type="submit" id="place-order-btn" class="btn-gold w-100 mt-4" style="justify-content: center; font-size: 0.9rem; padding: 1rem;">
+                        <i class="fas fa-lock me-1"></i> Place Order
+                    </button>
+
+                    <div class="d-flex justify-content-center gap-3 mt-3">
+                        <i class="fab fa-cc-visa" style="font-size: 1.5rem; color: var(--gray);"></i>
+                        <i class="fab fa-cc-mastercard" style="font-size: 1.5rem; color: var(--gray);"></i>
+                        <i class="fab fa-cc-amex" style="font-size: 1.5rem; color: var(--gray);"></i>
+                        <i class="fab fa-cc-paypal" style="font-size: 1.5rem; color: var(--gray);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        $(document).ready(function () {
+            function updatePreview() {
+                const name = $('#FullName').val() || '@Model.FullName' || '(Enter Name)';
+                const address = $('#ShippingAddress').val() || '';
+                const city = $('#City').val() || '';
+                const zip = $('#PostalCode').val() || '';
+                const phone = $('#Phone').val() || '(Enter Phone)';
+                const payment = $('input[name="PaymentMethod"]:checked').val();
+
+                $('#preview-name').text(name);
+                $('#preview-phone').text(phone);
+                
+                let fullAddress = address;
+                if (city) fullAddress += (fullAddress ? ', ' : '') + city;
+                if (zip) fullAddress += (zip ? ' - ' : '') + zip;
+                $('#preview-address').text(fullAddress || '(Enter Address)');
+
+                if (payment === 'Razorpay') {
+                    $('#razorpay-note').show();
+                    $('#place-order-btn').html('<i class="fas fa-credit-card me-1"></i> Pay with Razorpay');
+                    $('#preview-payment').text('Razorpay (Online Payment)').removeClass('status-pending').addClass('status-processing');
+                } else {
+                    $('#razorpay-note').hide();
+                    $('#place-order-btn').html('<i class="fas fa-lock me-1"></i> Place Order');
+                    $('#preview-payment').text('Cash on Delivery (COD)').removeClass('status-processing').addClass('status-pending');
+                }
+            }
+
+            $('#FullName, #ShippingAddress, #City, #PostalCode, #Phone').on('input', updatePreview);
+            $('input[name="PaymentMethod"]').change(updatePreview);
+            updatePreview();
+        });
+    </script>
+}

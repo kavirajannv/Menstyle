@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="MenStyle - Premium Men's Fashion. Shop the finest suits, shirts, and accessories." />
+    <title>@ViewData["Title"] | MenStyle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/menstyle.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+
+    <!-- ── Navbar ─────────────────────────────────── -->
+    <nav class="navbar-menstyle">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <!-- Brand -->
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand-logo">
+                    MEN<span>STYLE</span>
+                </a>
+
+                <!-- Desktop Nav -->
+                <div class="d-none d-lg-flex align-items-center gap-2">
+                    <a asp-controller="Home" asp-action="Index" asp-area="" class="nav-link-custom">Home</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-area="" class="nav-link-custom">Shop</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-area="" asp-route-categoryId="1" class="nav-link-custom">Shirts</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-area="" asp-route-categoryId="3" class="nav-link-custom">Suits</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-area="" asp-route-categoryId="4" class="nav-link-custom">Jackets</a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="nav-link-custom" style="color: var(--gold) !important;">
+                            <i class="fas fa-shield-halved me-1"></i>Admin
+                        </a>
+                    }
+                </div>
+
+                <!-- Right Controls -->
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Search -->
+                    <form asp-controller="Shop" asp-action="Index" asp-area="" method="get" class="search-form d-none d-md-flex">
+                        <input type="text" name="search" class="search-input" placeholder="Search products..." value="@ViewData["SearchQuery"]" />
+                        <button type="submit" class="btn-outline-gold" style="padding: 0.4rem 0.75rem;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <!-- Cart -->
+                        <a asp-controller="Cart" asp-action="Index" asp-area="" class="position-relative text-decoration-none">
+                            <i class="fas fa-bag-shopping" style="font-size: 1.2rem; color: var(--gray-light);"></i>
+                            <span class="cart-badge position-absolute" style="top:-8px; right:-8px;" id="cartCount">0</span>
+                        </a>
+
+                        <!-- Account dropdown -->
+                        <div class="dropdown">
+                            <button class="btn-dark" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i> Account
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" style="background: var(--dark-2); border: 1px solid var(--border-dark); min-width: 180px;">
+                                <li><a class="dropdown-item" href="/Orders" style="color: var(--gray-light); font-size: 0.85rem;"><i class="fas fa-box me-2 text-golden"></i> My Orders</a></li>
+                                <li><a class="dropdown-item" href="/Identity/Account/Manage" style="color: var(--gray-light); font-size: 0.85rem;"><i class="fas fa-gear me-2"></i> Settings</a></li>
+                                <li><hr class="dropdown-divider" style="border-color: var(--border-dark);"></li>
+                                <li>
+                                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                                        <button type="submit" class="dropdown-item" style="color: #f87171; font-size: 0.85rem; background: none; border: none; cursor: pointer; width: 100%; text-align: left; padding: 0.25rem 1rem;">
+                                            <i class="fas fa-right-from-bracket me-2"></i> Sign Out
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Login" class="btn-outline-gold" style="font-size: 0.75rem; padding: 0.5rem 1rem;">
+                            <i class="fas fa-right-to-bracket me-1"></i> Sign In
+                        </a>
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn-gold" style="font-size: 0.75rem; padding: 0.5rem 1rem;">
+                            Register
+                        </a>
+                    }
+
+                    <!-- Mobile Menu Toggle -->
+                    <button class="btn-dark d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNav" style="padding: 0.4rem 0.65rem;">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Nav -->
+            <div class="collapse" id="mobileNav">
+                <div class="d-flex flex-column gap-2 py-3" style="border-top: 1px solid var(--border-dark); margin-top: 0.75rem;">
+                    <a asp-controller="Home" asp-action="Index" asp-area="" class="nav-link-custom">Home</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-area="" class="nav-link-custom">All Products</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-area="" asp-route-categoryId="1" class="nav-link-custom">Shirts</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-area="" asp-route-categoryId="2" class="nav-link-custom">Trousers</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-area="" asp-route-categoryId="3" class="nav-link-custom">Suits</a>
+                    <form asp-controller="Shop" asp-action="Index" asp-area="" method="get" class="d-flex gap-2 mt-2">
+                        <input type="text" name="search" class="search-input" placeholder="Search..." style="flex: 1;" />
+                        <button type="submit" class="btn-gold" style="padding: 0.4rem 0.75rem;"><i class="fas fa-search"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Alerts ──────────────────────────────────── -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert-menstyle alert-success">
+                <i class="fas fa-circle-check"></i> @TempData["Success"]
+            </div>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert-menstyle alert-error">
+                <i class="fas fa-circle-exclamation"></i> @TempData["Error"]
+            </div>
+        </div>
+    }
+
+    <!-- ── Main Content ────────────────────────────── -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- ── Footer ─────────────────────────────────── -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="footer-brand">MenStyle</div>
+                    <p class="footer-text">The destination for the modern gentleman. Premium men's fashion curated with precision and style.</p>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="footer-heading">Shop</div>
+                    <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="1" asp-area="" class="footer-link">Shirts</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="2" asp-area="" class="footer-link">Trousers</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="3" asp-area="" class="footer-link">Suits</a>
+                    <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="4" asp-area="" class="footer-link">Jackets</a>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="footer-heading">Account</div>
+                    <a asp-area="Identity" asp-page="/Account/Login" class="footer-link">Sign In</a>
+                    <a asp-area="Identity" asp-page="/Account/Register" class="footer-link">Register</a>
+                    <a asp-controller="Orders" asp-action="Index" asp-area="" class="footer-link">My Orders</a>
+                </div>
+                <div class="col-lg-4">
+                    <div class="footer-heading">Contact</div>
+                    <p class="footer-text"><i class="fas fa-envelope me-2" style="color:var(--gold)"></i> support@menstyle.com</p>
+                    <p class="footer-text mt-1"><i class="fas fa-phone me-2" style="color:var(--gold)"></i> +1 (800) 000-0000</p>
+                    <div class="d-flex gap-3 mt-2">
+                        <a href="#" style="color: var(--gray); font-size: 1.1rem;"><i class="fab fa-instagram"></i></a>
+                        <a href="#" style="color: var(--gray); font-size: 1.1rem;"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" style="color: var(--gray); font-size: 1.1rem;"><i class="fab fa-x-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom d-flex justify-content-between flex-wrap gap-2">
+                <span>&copy; 2026 MenStyle. All rights reserved.</span>
+                <span>Premium Men's Fashion</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Fetch cart count for logged-in users
+        (function () {
+            fetch('/Cart/GetCount', { credentials: 'same-origin' })
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (data && document.getElementById('cartCount')) {
+                        document.getElementById('cartCount').textContent = data.count || 0;
+                    }
+                }).catch(() => {});
+        })();
+
+        // Auto-dismiss alerts after 4s
+        setTimeout(() => {
+            document.querySelectorAll('.alert-menstyle').forEach(el => {
+                el.style.transition = 'opacity 0.5s';
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 500);
+            });
+        }, 4000);
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
